@@ -1,0 +1,338 @@
+<title>XML em Dia</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Ferramentas gratuitas para validar a NFS-e padrão nacional e as tabelas do IBS/CBS antes de enviar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: faixa escura de abertura com um "resultado de validação" real ao lado; depois ferramentas, privacidade, planos e diagnóstico, numa coluna de 1120px. */
+:root {
+  --bg: #F4F7F6; --surface: #FFFFFF; --ink: #10302D; --muted: #52635F; --line: #D3E0DD;
+  --teal: #134E4A; --teal-soft: #E3EFED; --accent: #C2570C; --accent-soft: #FBE9DB;
+  --bad: #A12B2B; --bad-soft: #F8E1E1; --warn: #8A5A00; --warn-soft: #FBF0D6; --ok: #1F6B45; --ok-soft: #DDF0E5;
+  --band: #0E2E2B; --band-ink: #E6F0EE; --band-muted: #9DB8B3; --band-line: #24504B; --code: #F8DFC9;
+  --f-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --f-body: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0B1615; --surface: #12211F; --ink: #E2EDEB; --muted: #94ABA7; --line: #23403C;
+  --teal: #6FBFB4; --teal-soft: #173430; --accent: #F08A4B; --accent-soft: #3A2414;
+  --bad: #F08C8C; --bad-soft: #3A1B1B; --warn: #E9BE63; --warn-soft: #332810; --ok: #7DD1A2; --ok-soft: #14301F;
+  --band: #081211; --band-ink: #E2EDEB; --band-muted: #8FA9A4; --band-line: #1E3A36; --code: #F6C9A6; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0B1615; --surface: #12211F; --ink: #E2EDEB; --muted: #94ABA7; --line: #23403C;
+  --teal: #6FBFB4; --teal-soft: #173430; --accent: #F08A4B; --accent-soft: #3A2414;
+  --bad: #F08C8C; --bad-soft: #3A1B1B; --warn: #E9BE63; --warn-soft: #332810; --ok: #7DD1A2; --ok-soft: #14301F;
+  --band: #081211; --band-ink: #E2EDEB; --band-muted: #8FA9A4; --band-line: #1E3A36; --code: #F6C9A6; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 17px; line-height: 1.55; }
+h1, h2, h3 { font-family: var(--f-display); line-height: 1.1; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+code, .mono { font-family: var(--f-mono); font-size: .88em; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 8px; font-weight: 700; font-size: 16px; text-decoration: none; border: 2px solid transparent; cursor: pointer; font-family: var(--f-body); }
+.btn--primary { background: var(--accent); color: #fff; }
+.btn--primary:hover { filter: brightness(1.08); }
+.btn--ghost { border-color: currentColor; background: transparent; }
+
+/* ---------- abertura ---------- */
+.band { background: var(--band); color: var(--band-ink); }
+.nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 18px; flex-wrap: wrap; }
+.logo { font-family: var(--f-display); font-weight: 800; font-size: 22px; text-decoration: none; display: inline-flex; align-items: baseline; gap: 2px; }
+.logo span { color: var(--code); font-family: var(--f-mono); font-weight: 500; font-size: 18px; }
+.nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 22px; flex-wrap: wrap; font-size: 15px; }
+.nav ul a { text-decoration: none; color: var(--band-muted); }
+.nav ul a:hover { color: var(--band-ink); }
+
+.hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 48px; align-items: center; padding-block: 40px 64px; }
+.hero h1 { font-size: clamp(36px, 5.2vw, 60px); font-weight: 800; letter-spacing: -.02em; }
+.hero h1 em { font-style: normal; color: var(--code); }
+.hero .lead { color: var(--band-muted); font-size: 19px; max-width: 52ch; margin-top: 20px; }
+.hero .ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+.hero .btn--ghost { color: var(--band-ink); }
+.hero .nota { margin-top: 18px; font-size: 14px; color: var(--band-muted); }
+
+.resultado { background: var(--surface); color: var(--ink); border-radius: 12px; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,.35); min-width: 0; }
+.resultado header { display: flex; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); font-size: 14px; flex-wrap: wrap; }
+.resultado header b { font-family: var(--f-mono); font-weight: 500; overflow-wrap: anywhere; }
+.veredito { font-weight: 700; color: var(--bad); }
+.achado { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.achado:last-child { border-bottom: 0; }
+.selo { font-family: var(--f-mono); font-size: 12px; font-weight: 500; padding: 3px 8px; border-radius: 4px; align-self: start; text-align: center; }
+.selo--bad { background: var(--bad-soft); color: var(--bad); }
+.selo--warn { background: var(--warn-soft); color: var(--warn); }
+.achado h3 { font-family: var(--f-body); font-size: 15px; font-weight: 700; }
+.achado p { font-size: 14px; color: var(--muted); margin-top: 2px; }
+.achado code { color: var(--teal); }
+
+/* ---------- seções ---------- */
+section.sec { padding-block: 72px; }
+.sec-head { max-width: 640px; margin-bottom: 36px; display: grid; gap: 10px; }
+.sec-head h2 { font-size: clamp(28px, 3.4vw, 40px); font-weight: 700; letter-spacing: -.01em; }
+.sec-head p { color: var(--muted); }
+
+.tools { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.tool { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 26px; display: grid; gap: 12px; align-content: start; }
+.tool--live { border-color: var(--teal); }
+.tool .status { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; justify-self: start; padding: 3px 10px; border-radius: 999px; }
+.tool--live .status { background: var(--ok-soft); color: var(--ok); }
+.tool--soon .status { background: var(--teal-soft); color: var(--muted); }
+.tool h3 { font-size: 24px; }
+.tool p { color: var(--muted); font-size: 16px; }
+.tool ul { margin: 0; padding-left: 20px; font-size: 15px; color: var(--muted); display: grid; gap: 4px; }
+.tool .btn { justify-self: start; margin-top: 6px; }
+.tool--live .btn { background: var(--teal); color: var(--surface); }
+.tool--soon h3 { color: var(--muted); }
+
+.privacidade { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: start; border-top: 1px solid var(--line); }
+.fluxo { display: grid; gap: 0; border-left: 2px solid var(--line); margin-left: 8px; }
+.passo { position: relative; padding: 0 0 22px 24px; }
+.passo::before { content: ""; position: absolute; left: -7px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--teal); }
+.passo b { display: block; font-size: 17px; }
+.passo span { color: var(--muted); font-size: 15px; }
+.passo:last-child { padding-bottom: 0; }
+.passo--x::before { background: var(--accent); }
+
+.planos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: stretch; }
+.plano { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 28px; display: grid; grid-template-rows: auto auto auto 1fr auto; gap: 14px; }
+.plano--destaque { border: 2px solid var(--accent); }
+.plano h3 { font-size: 22px; }
+.preco { font-family: var(--f-display); font-size: 36px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.preco small { font-family: var(--f-body); font-size: 15px; font-weight: 400; color: var(--muted); }
+.plano > p { color: var(--muted); font-size: 15px; }
+.plano ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 15px; align-content: start; }
+.plano li { padding-left: 24px; position: relative; }
+.plano li::before { content: "✓"; position: absolute; left: 0; color: var(--ok); font-weight: 700; }
+.plano .btn { justify-content: center; }
+.plano--destaque .btn { background: var(--accent); color: #fff; }
+.plano:not(.plano--destaque) .btn { border-color: var(--line); color: var(--ink); }
+.plano .btn:hover { border-color: var(--accent); }
+
+.diag { background: var(--band); color: var(--band-ink); border-radius: 16px; padding: 40px; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 36px; }
+.diag h2 { font-size: clamp(26px, 3vw, 36px); }
+.diag p { color: var(--band-muted); margin-top: 12px; }
+.diag ol { margin: 18px 0 0; padding-left: 22px; color: var(--band-ink); display: grid; gap: 6px; }
+form.lista { display: grid; gap: 12px; align-content: start; }
+form.lista label { font-size: 14px; font-weight: 600; display: grid; gap: 6px; }
+form.lista input, form.lista select { font: inherit; font-size: 16px; padding: 11px 12px; border-radius: 8px; border: 1px solid var(--band-line); background: var(--band); color: var(--band-ink); }
+form.lista .btn { justify-content: center; margin-top: 4px; }
+.retorno { font-size: 14px; color: var(--code); min-height: 1.4em; }
+
+footer.rodape { border-top: 1px solid var(--line); padding-block: 32px 48px; font-size: 14px; color: var(--muted); display: grid; gap: 8px; }
+footer.rodape p { max-width: 90ch; }
+
+@media (max-width: 860px) {
+  .hero, .privacidade, .diag { grid-template-columns: minmax(0, 1fr); }
+  .tools, .planos { grid-template-columns: minmax(0, 1fr); }
+  .diag { padding: 28px 22px; }
+  .nav ul { gap: 14px; }
+}
+@media (max-width: 420px) { .achado { grid-template-columns: minmax(0, 1fr); } .selo { justify-self: start; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="band">
+  <div class="wrap">
+    <nav class="nav" aria-label="Principal">
+      <a class="logo" href="#topo">XML em Dia<span>/&gt;</span></a>
+      <ul>
+        <li><a href="#ferramentas">Ferramentas</a></li>
+        <li><a href="#privacidade">Privacidade</a></li>
+        <li><a href="#planos">Planos</a></li>
+        <li><a href="#diagnostico">Diagnóstico</a></li>
+      </ul>
+    </nav>
+
+    <div class="hero" id="topo">
+      <div>
+        <p class="eyebrow">NFS-e padrão nacional · IBS/CBS</p>
+        <h1>Ache a rejeição <em>antes</em> do ambiente nacional.</h1>
+        <p class="lead">Solte o XML do DPS ou da NFS-e e veja, em segundos, o que o XSD e as regras oficiais vão recusar: ordem dos elementos, códigos Exxxx, cálculos de PIS/COFINS e o grupo de tributação regular do IBS/CBS.</p>
+        <div class="ctas">
+          <a class="btn btn--primary" href="validador.html">Validar um XML grátis</a>
+          <a class="btn btn--ghost" href="consulta.html">Consultar cIndOp e cClassTrib</a>
+        </div>
+        <p class="nota">O arquivo é lido no seu navegador e não vai para nenhum servidor.</p>
+      </div>
+
+      <figure class="resultado" aria-label="Exemplo de resultado de validação" style="margin:0">
+        <header><b>exemplo-1-reidi.xml</b><span class="veredito">Reprovado · 2 achados</span></header>
+        <div class="achado">
+          <span class="selo selo--bad">E0965</span>
+          <div><h3>Grupo de tributação regular ausente</h3>
+            <p><code>cClassTrib 550016</code> (REIDI) exige <code>gIBSCBS/gTribRegular</code> com <code>CSTReg</code> e <code>cClassTribReg</code>. O ambiente rejeita.</p></div>
+        </div>
+        <div class="achado">
+          <span class="selo selo--bad">XSD</span>
+          <div><h3>Ordem dos elementos em cServ</h3>
+            <p><code>xDescServ</code> veio antes de <code>cNBS</code>. Ordem esperada: cTribNac, cTribMun, cNBS, cIntContrib, xDescServ.</p></div>
+        </div>
+        <div class="achado">
+          <span class="selo selo--warn">VER-05</span>
+          <div><h3>PIS/COFINS retidos fora do vRetCSLL</h3>
+            <p><code>tpRetPisCofins 3</code>, mas <code>vRetCSLL</code> é 1% da base: só a CSLL. O ambiente aceita, e a NFS-e sai com retenção errada.</p></div>
+        </div>
+      </figure>
+    </div>
+  </div>
+</div>
+
+<main>
+  <section class="sec" id="ferramentas">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Ferramentas</p>
+        <h2>Feitas a partir das Notas Técnicas, atualizadas a cada versão.</h2>
+        <p>Cada regra traz o código oficial ou o fundamento que a sustenta. O que rejeita aparece separado do que é só alerta.</p>
+      </div>
+      <div class="tools">
+        <article class="tool tool--live">
+          <span class="status">Disponível</span>
+          <h3>Validador NFS-e</h3>
+          <p>Confere DPS, RPS e NFS-e contra o XSD de Produção Restrita v1.01 e o leiaute da NT 009.</p>
+          <ul>
+            <li>22 regras oficiais no DPS e 4 no retorno da NFS-e</li>
+            <li>Ordem dos elementos e domínio dos valores pelo XSD</li>
+            <li>Comparação Produção × Homologação e texto pronto para chamado</li>
+          </ul>
+          <a class="btn" href="validador.html">Abrir o validador</a>
+        </article>
+        <article class="tool tool--live">
+          <span class="status">Disponível</span>
+          <h3>Consulta Anexos VII e VIII</h3>
+          <p>Digite o item da LC 116 e veja as NBS, os cIndOp e os cClassTrib previstos, com o local de incidência do IBS.</p>
+          <ul>
+            <li>1.610 combinações item × NBS × cIndOp × cClassTrib</li>
+            <li>40 indicadores da operação, 28 válidos para NFS-e</li>
+            <li>Busca por código ou por descrição do serviço</li>
+          </ul>
+          <a class="btn" href="consulta.html">Abrir a consulta</a>
+        </article>
+        <article class="tool tool--soon">
+          <span class="status">Em breve</span>
+          <h3>Calculadora IBS/CBS por serviço</h3>
+          <p>Base, alíquotas efetivas de 2026 em diante e o grupo de tributação regular, montados a partir do cClassTrib.</p>
+        </article>
+        <article class="tool tool--soon">
+          <span class="status">Em breve</span>
+          <h3>Alertas de nova NT</h3>
+          <p>Aviso por e-mail quando sair XSD, Anexo ou Nota Técnica nova, com o que mudou em linguagem direta.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="privacidade">
+    <div class="wrap privacidade">
+      <div class="sec-head" style="margin:0">
+        <p class="eyebrow">Privacidade</p>
+        <h2>Seu XML não sai do seu computador.</h2>
+        <p>Nota fiscal tem CNPJ, valores e dados de cliente. Por isso toda a validação roda no navegador: a página baixa as regras uma vez e confere o arquivo localmente. Não há upload, nem cópia guardada.</p>
+      </div>
+      <div class="fluxo" role="list">
+        <div class="passo" role="listitem"><b>Você solta o XML na página</b><span>O navegador lê o arquivo na memória.</span></div>
+        <div class="passo" role="listitem"><b>As regras rodam ali mesmo</b><span>XSD, regras Exxxx, Anexos VII e VIII, cálculos.</span></div>
+        <div class="passo" role="listitem"><b>O resultado aparece na tela</b><span>Exporte em CSV ou copie o texto do chamado.</span></div>
+        <div class="passo passo--x" role="listitem"><b>Nada é enviado</b><span>Feche a aba e não fica rastro.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="planos">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Planos</p>
+        <h2>Grátis para conferir uma nota. Pago para conferir o mês.</h2>
+      </div>
+      <div class="planos">
+        <article class="plano">
+          <h3>Grátis</h3>
+          <p class="preco">R$ 0</p>
+          <p>Para tirar a dúvida de uma nota rejeitada.</p>
+          <ul>
+            <li>Validador e consulta, sem cadastro</li>
+            <li>Um ambiente por vez</li>
+            <li>Exportação em CSV</li>
+          </ul>
+          <a class="btn" href="validador.html">Começar agora</a>
+        </article>
+        <article class="plano plano--destaque">
+          <h3>Profissional</h3>
+          <p class="preco">R$ 79 <small>/ mês</small></p>
+          <p>Para quem emite ou confere volume de NFS-e.</p>
+          <ul>
+            <li>Validação em lote, com relatório em PDF e Excel</li>
+            <li>Histórico das validações por cliente</li>
+            <li>Alerta de nova NT no dia da publicação</li>
+            <li>Acesso por API para o ERP</li>
+          </ul>
+          <a class="btn" href="#diagnostico">Entrar na lista de espera</a>
+        </article>
+        <article class="plano">
+          <h3>Diagnóstico</h3>
+          <p class="preco">R$ 1.500 <small>a partir de</small></p>
+          <p>Para a empresa que precisa adequar o ERP à Reforma.</p>
+          <ul>
+            <li>Análise de uma amostra de XMLs reais</li>
+            <li>Lista de ajustes no ERP, por prioridade</li>
+            <li>Reunião de apresentação dos achados</li>
+          </ul>
+          <a class="btn" href="#diagnostico">Pedir o diagnóstico</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="diagnostico" style="padding-top:0">
+    <div class="wrap">
+      <div class="diag">
+        <div>
+          <p class="eyebrow">Diagnóstico de XML para a Reforma</p>
+          <h2>Seu ERP está pronto para o IBS/CBS?</h2>
+          <p>Mais de dez anos de rotina fiscal aplicados a uma amostra das suas notas. Você recebe o que o ambiente vai rejeitar, o que passa mas sai errado, e o que mudar no ERP.</p>
+          <ol>
+            <li>Você envia de 10 a 30 XMLs de Produção e Homologação.</li>
+            <li>Eu rodo a validação completa e reviso cada achado.</li>
+            <li>Você recebe o relatório em até 5 dias úteis.</li>
+          </ol>
+        </div>
+        <form class="lista" id="formLista" novalidate>
+          <label for="fNome">Nome<input id="fNome" name="nome" autocomplete="name" required></label>
+          <label for="fEmail">E-mail de trabalho<input id="fEmail" name="email" type="email" autocomplete="email" required></label>
+          <label for="fInteresse">Tenho interesse em
+            <select id="fInteresse" name="interesse">
+              <option>Diagnóstico de XML</option>
+              <option>Plano Profissional</option>
+              <option>Alertas de nova NT</option>
+            </select>
+          </label>
+          <button class="btn btn--primary" type="submit">Quero ser contatado</button>
+          <p class="retorno" id="retorno" role="status"></p>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="wrap">
+  <footer class="rodape">
+    <p><b>XML em Dia</b> é independente e não é afiliado à Receita Federal, ao Comitê Gestor da NFS-e nem ao Serpro. As ferramentas não substituem a validação do ambiente nacional nem constituem orientação tributária.</p>
+    <p>Referências: XSD de Produção Restrita v1.01 (20/10/2026), NT 009 leiaute v1.04.01, Anexo VII v1.03.00 e Anexo VIII v1.02.00, do Portal da NFS-e.</p>
+  </footer>
+</div>
+
+<script>
+document.getElementById('formLista').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var nome = document.getElementById('fNome'), email = document.getElementById('fEmail'), r = document.getElementById('retorno');
+  if (!nome.value.trim()) { r.textContent = 'Informe seu nome.'; nome.focus(); return; }
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.value.trim())) { r.textContent = 'Informe um e-mail válido, como nome@empresa.com.br.'; email.focus(); return; }
+  r.textContent = 'Recebido, ' + nome.value.trim().split(' ')[0] + '. (Protótipo: ligue este formulário a um serviço de captura antes de publicar.)';
+  this.reset();
+});
+</script>

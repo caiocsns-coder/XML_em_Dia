@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Consulta cIndOp e cClassTrib</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: barra de busca fixa no topo; à esquerda os resultados, à direita o detalhe do item escolhido. */
+:root {
+  --bg: #F4F7F6; --surface: #FFFFFF; --ink: #10302D; --muted: #52635F; --line: #D3E0DD;
+  --teal: #134E4A; --teal-soft: #E3EFED; --accent: #C2570C; --accent-soft: #FBE9DB;
+  --ok: #1F6B45; --ok-soft: #DDF0E5; --no: #8A3B3B; --no-soft: #F6E3E3;
+  --band: #0E2E2B; --band-ink: #E6F0EE; --band-muted: #9DB8B3; --code: #F8DFC9;
+  --f-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --f-body: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0B1615; --surface: #12211F; --ink: #E2EDEB; --muted: #94ABA7; --line: #23403C;
+  --teal: #6FBFB4; --teal-soft: #173430; --accent: #F08A4B; --accent-soft: #3A2414;
+  --ok: #7DD1A2; --ok-soft: #14301F; --no: #F0A0A0; --no-soft: #3A1B1B;
+  --band: #081211; --band-ink: #E2EDEB; --band-muted: #8FA9A4; --code: #F6C9A6; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0B1615; --surface: #12211F; --ink: #E2EDEB; --muted: #94ABA7; --line: #23403C;
+  --teal: #6FBFB4; --teal-soft: #173430; --accent: #F08A4B; --accent-soft: #3A2414;
+  --ok: #7DD1A2; --ok-soft: #14301F; --no: #F0A0A0; --no-soft: #3A1B1B;
+  --band: #081211; --band-ink: #E2EDEB; --band-muted: #8FA9A4; --code: #F6C9A6; color-scheme: dark }
+* { box-sizing: border-box; }
+html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.5; }
+h1, h2, h3 { font-family: var(--f-display); margin: 0; line-height: 1.15; text-wrap: balance; }
+p { margin: 0; }
+code, .mono { font-family: var(--f-mono); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+.topo { background: var(--band); color: var(--band-ink); }
+.topo .wrap { padding-block: 18px 22px; display: grid; gap: 14px; }
+.linha1 { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; }
+.linha1 a { color: var(--code); text-decoration: none; font-weight: 600; font-size: 14px; }
+.topo h1 { font-size: clamp(24px, 3vw, 32px); font-weight: 800; }
+.topo p { color: var(--band-muted); font-size: 15px; max-width: 75ch; }
+.busca { display: flex; gap: 10px; flex-wrap: wrap; }
+.busca input { flex: 1 1 280px; min-width: 0; font: inherit; font-size: 17px; padding: 12px 14px; border-radius: 8px; border: 1px solid #2D5A55; background: var(--surface); color: var(--ink); }
+.atalhos { display: flex; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--band-muted); align-items: center; }
+.atalhos button { font: inherit; font-family: var(--f-mono); font-size: 13px; background: transparent; border: 1px solid #2D5A55; color: var(--band-ink); border-radius: 999px; padding: 3px 10px; cursor: pointer; }
+.atalhos button:hover { border-color: var(--code); }
+
+.corpo { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 24px; padding-block: 24px 48px; align-items: start; }
+.lista h2 { font-family: var(--f-body); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
+.lista h2:first-child { margin-top: 0; }
+.lista ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.lista button { width: 100%; text-align: left; font: inherit; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; cursor: pointer; color: var(--ink); display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 10px; align-items: baseline; }
+.lista button:hover { border-color: var(--teal); }
+.lista button[aria-current="true"] { border-color: var(--accent); box-shadow: inset 4px 0 0 var(--accent); }
+.lista .cod { font-family: var(--f-mono); font-size: 14px; color: var(--teal); }
+.lista .desc { font-size: 14px; color: var(--muted); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.vazio { color: var(--muted); font-size: 15px; padding: 12px 0; }
+.mais { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+.detalhe { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 24px; min-width: 0; display: grid; gap: 18px; }
+.detalhe .tipo { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.detalhe h2 { font-size: 26px; font-weight: 700; display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.detalhe h2 code { font-size: 22px; color: var(--teal); font-weight: 500; }
+.detalhe .descricao { color: var(--muted); max-width: 80ch; }
+.resumo { display: flex; gap: 10px; flex-wrap: wrap; }
+.resumo span { background: var(--teal-soft); border-radius: 6px; padding: 4px 10px; font-size: 14px; font-variant-numeric: tabular-nums; }
+.tabela { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+table { width: 100%; border-collapse: collapse; min-width: 640px; font-size: 14px; }
+th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); background: var(--teal-soft); padding: 9px 12px; font-weight: 700; }
+td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top; }
+td.nbs { font-family: var(--f-mono); white-space: nowrap; color: var(--teal); }
+tr.grupo td { border-top: 2px solid var(--line); }
+.chip { display: inline-flex; gap: 6px; align-items: baseline; font-family: var(--f-mono); font-size: 13px; background: none; border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; cursor: pointer; color: var(--ink); text-align: left; }
+.chip:hover { border-color: var(--accent); }
+.chip small { font-family: var(--f-body); color: var(--muted); font-size: 12px; }
+.pill { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.pill--ok { background: var(--ok-soft); color: var(--ok); }
+.pill--no { background: var(--no-soft); color: var(--no); }
+dl.ficha { display: grid; grid-template-columns: minmax(120px, 200px) minmax(0, 1fr); gap: 10px 18px; margin: 0; }
+dl.ficha dt { color: var(--muted); font-size: 14px; }
+dl.ficha dd { margin: 0; }
+.aviso { font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+
+@media (max-width: 820px) {
+  .corpo { grid-template-columns: minmax(0, 1fr); }
+  dl.ficha { grid-template-columns: minmax(0, 1fr); gap: 2px 0; }
+  dl.ficha dd { margin-bottom: 10px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<header class="topo">
+  <div class="wrap">
+    <div class="linha1"><a href="index.html">&larr; XML em Dia</a></div>
+    <h1>Consulta cIndOp e cClassTrib</h1>
+    <p>Busque pelo item da LC 116 (07.02 ou 070202), pela descrição do serviço, por um cIndOp ou por um cClassTrib. Dados dos Anexos VII (v__V7__) e VIII (v__V8__) do Portal da NFS-e.</p>
+    <div class="busca">
+      <label for="q" class="mono" style="position:absolute;left:-9999px">Buscar</label>
+      <input id="q" type="search" placeholder="Ex.: 07.02, obra, 020201, 200046" autocomplete="off" value="07.02">
+    </div>
+    <div class="atalhos"><span>Exemplos:</span>
+      <button type="button" data-q="07.02">07.02</button>
+      <button type="button" data-q="17.19">17.19</button>
+      <button type="button" data-q="limpeza">limpeza</button>
+      <button type="button" data-q="020202">020202</button>
+      <button type="button" data-q="200052">200052</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap corpo">
+  <nav class="lista" id="lista" aria-label="Resultados"></nav>
+  <section class="detalhe" id="detalhe" aria-live="polite"></section>
+</main>
+
+<script>
+var D = __DADOS__;
+(function () {
+  'use strict';
+  var A7 = {}; D.a7.forEach(function (l) { A7[l[0]] = { cod: l[0], tipo: l[1], carac: l[2], local: l[3], disp: l[4], nfse: l[5] === 'S', inc: l[6] }; });
+  var porItem = {}, porInd = {}, porCC = {};
+  D.a8.forEach(function (l) {
+    (porItem[l[0]] = porItem[l[0]] || []).push(l);
+    (porInd[l[2]] = porInd[l[2]] || {})[l[0]] = 1;
+    (porCC[l[3]] = porCC[l[3]] || {})[l[0]] = 1;
+  });
+  var ITENS = Object.keys(D.itens).sort();
+  var $ = function (s) { return document.querySelector(s); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function sem(s) { return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+  function cap(s) { s = String(s || ''); return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase(); }
+  function incid(c) { var a = A7[c]; return a ? (a.inc && a.inc !== '-' ? a.inc : a.local) : ''; }
+  var sel = null;
+
+  function buscar(q) {
+    q = q.trim(); var n = sem(q), dig = q.replace(/\D/g, '');
+    var r = { itens: [], ind: [], cc: [] };
+    if (!q) return r;
+    ITENS.forEach(function (it) {
+      var d = it.replace(/\./g, '');
+      if (it.indexOf(q) === 0 || (dig.length >= 2 && d.indexOf(dig) === 0) || (dig.length === 6 && d === dig.slice(0, 4)) || (n.length >= 3 && !/^\d/.test(n) && sem(D.itens[it]).indexOf(n) >= 0)) r.itens.push(it);
+    });
+    Object.keys(A7).forEach(function (c) {
+      var a = A7[c];
+      if ((dig.length >= 2 && c.indexOf(dig) === 0) || (n.length >= 3 && !/^\d/.test(n) && sem(a.tipo + ' ' + a.carac).indexOf(n) >= 0)) r.ind.push(c);
+    });
+    Object.keys(D.cclass).forEach(function (c) {
+      if ((dig.length >= 2 && c.indexOf(dig) === 0) || (n.length >= 3 && !/^\d/.test(n) && sem(D.cclass[c]).indexOf(n) >= 0)) r.cc.push(c);
+    });
+    r.cc.sort();
+    return r;
+  }
+
+  function botao(tipo, cod, desc) {
+    var atual = sel && sel.tipo === tipo && sel.cod === cod;
+    return '<li><button type="button" data-tipo="' + tipo + '" data-cod="' + esc(cod) + '"' + (atual ? ' aria-current="true"' : '') + '><span class="cod">' + esc(cod) + '</span><span class="desc">' + esc(desc) + '</span></button></li>';
+  }
+  function grupo(titulo, lista, tipo, desc) {
+    if (!lista.length) return '';
+    var max = 40;
+    return '<h2>' + titulo + ' (' + lista.length + ')</h2><ul>' + lista.slice(0, max).map(function (c) { return botao(tipo, c, desc(c)); }).join('') + '</ul>' +
+      (lista.length > max ? '<p class="mais">Mostrando 40. Refine a busca para ver os demais.</p>' : '');
+  }
+
+  function renderLista(r) {
+    var h = grupo('Itens da LC 116', r.itens, 'item', function (c) { return cap(D.itens[c]); }) +
+      grupo('Indicadores da operação (cIndOp)', r.ind, 'ind', function (c) { return A7[c].carac; }) +
+      grupo('Classificação tributária (cClassTrib)', r.cc, 'cc', function (c) { return D.cclass[c]; });
+    $('#lista').innerHTML = h || '<p class="vazio">Nada encontrado. Tente o item com ponto (07.02), parte da descrição (obra, consultoria) ou um código de 6 dígitos.</p>';
+  }
+
+  function chipInd(c) { var a = A7[c]; return '<button type="button" class="chip" data-tipo="ind" data-cod="' + c + '">' + c + (a ? ' <small>' + esc(a.carac.length > 46 ? a.carac.slice(0, 46) + '…' : a.carac) + '</small>' : '') + '</button>'; }
+  function chipCC(c) { var nm = D.cclass[c] || ''; return '<button type="button" class="chip" data-tipo="cc" data-cod="' + c + '">' + c + ' <small>' + esc(nm.length > 50 ? nm.slice(0, 50) + '…' : nm) + '</small></button>'; }
+  function chipItem(c) { return '<button type="button" class="chip" data-tipo="item" data-cod="' + c + '">' + c + ' <small>' + esc(cap(D.itens[c]).slice(0, 50)) + '</small></button>'; }
+
+  function detalheItem(it) {
+    var linhas = porItem[it] || [];
+    var nbs = {}, inds = {}, ccs = {};
+    linhas.forEach(function (l) {
+      var g = nbs[l[1]] = nbs[l[1]] || { ind: {}, cc: {} };
+      g.ind[l[2]] = 1; g.cc[l[3]] = 1; inds[l[2]] = 1; ccs[l[3]] = 1;
+    });
+    var nk = Object.keys(nbs).sort();
+    var h = '<p class="tipo">Item da LC 116</p><h2><code>' + esc(it) + '</code></h2><p class="descricao">' + esc(cap(D.itens[it])) + '</p>';
+    if (!linhas.length) return h + '<p class="aviso">Este item consta da lista, mas o Anexo VIII ainda não traz combinações para ele.</p>';
+    h += '<div class="resumo"><span>' + nk.length + ' NBS</span><span>' + Object.keys(inds).length + ' cIndOp</span><span>' + Object.keys(ccs).length + ' cClassTrib</span></div>';
+    h += '<div class="tabela"><table><thead><tr><th>NBS</th><th>cIndOp previstos</th><th>cClassTrib previstos</th></tr></thead><tbody>' +
+      nk.map(function (k) {
+        var g = nbs[k];
+        return '<tr class="grupo"><td class="nbs">' + esc(k) + '</td><td><div style="display:grid;gap:4px">' + Object.keys(g.ind).sort().map(chipInd).join('') +
+          '</div></td><td><div style="display:grid;gap:4px">' + Object.keys(g.cc).sort().map(chipCC).join('') + '</div></td></tr>';
+      }).join('') + '</tbody></table></div>';
+    h += '<div><p class="tipo" style="margin-bottom:8px">Local de incidência do IBS por cIndOp</p><dl class="ficha">' +
+      Object.keys(inds).sort().map(function (c) { return '<dt class="mono">' + c + '</dt><dd>' + esc(incid(c) || '—') + '</dd>'; }).join('') + '</dl></div>';
+    h += '<p class="aviso">O Anexo VIII é descrito pelo portal como trabalho preliminar e não tem regra de negócio nos ambientes nacionais: uma combinação fora dele é alerta, não rejeição. Para regimes com suspensão (REIDI, Rehidro), o Anexo lista a tributação regular, que vai em <code>cClassTribReg</code>.</p>';
+    return h;
+  }
+
+  function detalheInd(c) {
+    var a = A7[c], itens = Object.keys(porInd[c] || {}).sort();
+    if (!a) return '<p class="tipo">cIndOp</p><h2><code>' + esc(c) + '</code></h2><p class="aviso">Este código aparece no Anexo VIII, mas não na tabela do Anexo VII carregada.</p>';
+    return '<p class="tipo">Indicador da operação (cIndOp)</p><h2><code>' + c + '</code> ' + (a.nfse ? '<span class="pill pill--ok">Válido para NFS-e</span>' : '<span class="pill pill--no">Não habilitado para NFS-e (E0901)</span>') + '</h2>' +
+      '<dl class="ficha"><dt>Tipo de operação</dt><dd>' + esc(a.tipo) + '</dd><dt>Característica</dt><dd>' + esc(a.carac) + '</dd><dt>Local do fornecimento</dt><dd>' + esc(a.local) + '</dd>' +
+      '<dt>Incidência do IBS na NFS-e</dt><dd>' + esc(a.inc && a.inc !== '-' ? a.inc : '—') + '</dd><dt>Dispositivo legal (LC 214/2025)</dt><dd>' + esc(a.disp) + '</dd></dl>' +
+      '<div><p class="tipo" style="margin-bottom:8px">Itens da LC 116 que admitem este cIndOp (' + itens.length + ')</p><div style="display:flex;flex-wrap:wrap;gap:6px">' + (itens.map(chipItem).join('') || '<span class="vazio">Nenhum item no Anexo VIII.</span>') + '</div></div>' +
+      (c.slice(0, 2) === '02' ? '<p class="aviso">Itens 99.03 (locação, cessão e arrendamento de imóveis) exigem cIndOp do grupo 02 (regra E0902).</p>' : '');
+  }
+
+  function detalheCC(c) {
+    var itens = Object.keys(porCC[c] || {}).sort();
+    return '<p class="tipo">Classificação tributária (cClassTrib)</p><h2><code>' + c + '</code></h2><p class="descricao">' + esc(D.cclass[c] || '') + '</p>' +
+      '<dl class="ficha"><dt>CST correspondente</dt><dd class="mono">' + c.slice(0, 3) + '</dd></dl>' +
+      '<p class="aviso" style="border:0;padding:0">Os três primeiros dígitos do cClassTrib devem ser iguais ao CST informado (regra E0959).</p>' +
+      '<div><p class="tipo" style="margin-bottom:8px">Itens da LC 116 em que aparece (' + itens.length + ')</p><div style="display:flex;flex-wrap:wrap;gap:6px">' + itens.map(chipItem).join('') + '</div></div>';
+  }
+
+  function mostrar(tipo, cod) {
+    sel = { tipo: tipo, cod: cod };
+    $('#detalhe').innerHTML = tipo === 'item' ? detalheItem(cod) : tipo === 'ind' ? detalheInd(cod) : detalheCC(cod);
+    document.querySelectorAll('#lista button').forEach(function (b) {
+      if (b.dataset.tipo === tipo && b.dataset.cod === cod) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
+    });
+  }
+
+  function atualizar() {
+    var r = buscar($('#q').value);
+    renderLista(r);
+    var primeiro = r.itens.length ? ['item', r.itens[0]] : r.ind.length ? ['ind', r.ind[0]] : r.cc.length ? ['cc', r.cc[0]] : null;
+    if (primeiro) mostrar(primeiro[0], primeiro[1]);
+    else $('#detalhe').innerHTML = '<p class="vazio">Escolha um resultado à esquerda.</p>';
+  }
+
+  $('#q').addEventListener('input', atualizar);
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-tipo][data-cod]');
+    if (b) { mostrar(b.dataset.tipo, b.dataset.cod); if (b.classList.contains('chip')) $('#detalhe').scrollIntoView({ block: 'start', behavior: 'smooth' }); return; }
+    var a = e.target.closest('[data-q]');
+    if (a) { $('#q').value = a.dataset.q; atualizar(); }
+  });
+  atualizar();
+})();
+</script>
+</body>
+</html>
