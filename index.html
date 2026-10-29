@@ -1,5 +1,9 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>XML em Dia</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Ferramentas gratuitas para validar a NFS-e padrão nacional e as tabelas do IBS/CBS antes de enviar.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,6 +31,10 @@
   --band: #081211; --band-ink: #E2EDEB; --band-muted: #8FA9A4; --band-line: #1E3A36; --code: #F6C9A6; color-scheme: dark }
 
 * { box-sizing: border-box; }
+html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
 body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 17px; line-height: 1.55; }
 h1, h2, h3 { font-family: var(--f-display); line-height: 1.1; margin: 0; text-wrap: balance; }
 p { margin: 0; }
@@ -135,6 +143,8 @@ footer.rodape p { max-width: 90ch; }
 @media (max-width: 420px) { .achado { grid-template-columns: minmax(0, 1fr); } .selo { justify-self: start; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
+</head>
+<body>
 
 <div class="band">
   <div class="wrap">
@@ -161,11 +171,11 @@ footer.rodape p { max-width: 90ch; }
       </div>
 
       <figure class="resultado" aria-label="Exemplo de resultado de validação" style="margin:0">
-        <header><b>exemplo-1-reidi.xml</b><span class="veredito">Reprovado · 2 achados</span></header>
+        <header><b>dps-serie1-0412.xml</b><span class="veredito">Reprovado · 2 achados</span></header>
         <div class="achado">
-          <span class="selo selo--bad">E0965</span>
-          <div><h3>Grupo de tributação regular ausente</h3>
-            <p><code>cClassTrib 550016</code> (REIDI) exige <code>gIBSCBS/gTribRegular</code> com <code>CSTReg</code> e <code>cClassTribReg</code>. O ambiente rejeita.</p></div>
+          <span class="selo selo--bad">E0959</span>
+          <div><h3>cClassTrib fora do grupo do CST</h3>
+            <p><code>CST 000</code> com <code>cClassTrib 200046</code>. Os três primeiros dígitos do cClassTrib precisam ser iguais ao CST. O ambiente rejeita.</p></div>
         </div>
         <div class="achado">
           <span class="selo selo--bad">XSD</span>
@@ -336,3 +346,5 @@ document.getElementById('formLista').addEventListener('submit', function (e) {
   this.reset();
 });
 </script>
+</body>
+</html>

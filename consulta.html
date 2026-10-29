@@ -198,7 +198,7 @@ var D = {"a7":[["010101","Bem Móvel Material","Presencial, com retirada no esta
       }).join('') + '</tbody></table></div>';
     h += '<div><p class="tipo" style="margin-bottom:8px">Local de incidência do IBS por cIndOp</p><dl class="ficha">' +
       Object.keys(inds).sort().map(function (c) { return '<dt class="mono">' + c + '</dt><dd>' + esc(incid(c) || '—') + '</dd>'; }).join('') + '</dl></div>';
-    h += '<p class="aviso">O Anexo VIII é descrito pelo portal como trabalho preliminar e não tem regra de negócio nos ambientes nacionais: uma combinação fora dele é alerta, não rejeição. Para regimes com suspensão (REIDI, Rehidro), o Anexo lista a tributação regular, que vai em <code>cClassTribReg</code>.</p>';
+    h += '<p class="aviso">O Anexo VIII é descrito pelo portal como trabalho preliminar e não tem regra de negócio nos ambientes nacionais: uma combinação fora dele é alerta, não rejeição. Para regimes com suspensão do IBS/CBS, o Anexo lista a tributação regular, que vai em <code>cClassTribReg</code>.</p>';
     return h;
   }
 
